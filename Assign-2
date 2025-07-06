@@ -1,0 +1,212 @@
+#include"assign2.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int MAX_SIZE = 1000001;
+int max = 1000000001;
+int arr[100001], seg[100001*4];
+
+
+typedef struct {
+    int arr[100001];
+    int front, rear;
+} Deque;
+
+// Initialize deque
+void initDeque(Deque* dq) {
+    dq->front = -1;
+    dq->rear = -1;
+}
+
+// Check if deque is empty
+int isEmpty(Deque* dq) {
+    return dq->front == -1;
+}
+
+// Check if deque is full
+int isFull(Deque* dq) {
+    return ((dq->rear + 1) % MAX_SIZE) == dq->front;
+}
+
+// Insert at front
+void enqueueFront(Deque* dq, int x) {
+    if (isFull(dq)) {
+        printf("Deque overflow\n");
+        return;
+    }
+
+    if (isEmpty(dq)) {
+        dq->front = dq->rear = 0;
+    } else {
+        dq->front = (dq->front - 1 + MAX_SIZE) % MAX_SIZE;
+    }
+    dq->arr[dq->front] = x;
+}
+
+// Insert at rear
+void enqueueRear(Deque* dq, int x) {
+    if (isFull(dq)) {
+        printf("Deque overflow\n");
+        return;
+    }
+
+    if (isEmpty(dq)) {
+        dq->front = dq->rear = 0;
+    } else {
+        dq->rear = (dq->rear + 1) % MAX_SIZE;
+    }
+    dq->arr[dq->rear] = x;
+}
+
+// Remove from front
+void dequeueFront(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque underflow\n");
+        return;
+    }
+
+    if (dq->front == dq->rear) {
+        dq->front = dq->rear = -1;
+    } else {
+        dq->front = (dq->front + 1) % MAX_SIZE;
+    }
+}
+
+// Remove from rear
+void dequeueRear(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque underflow\n");
+        return;
+    }
+
+    if (dq->front == dq->rear) {
+        dq->front = dq->rear = -1;
+    } else {
+        dq->rear = (dq->rear - 1 + MAX_SIZE) % MAX_SIZE;
+    }
+}
+
+// Get front element
+int getFront(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty\n");
+        return -1;
+    }
+    return dq->arr[dq->front];
+}
+
+// Get rear element
+int getRear(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty\n");
+        return -1;
+    }
+    return dq->arr[dq->rear];
+}
+
+
+int lefty(int ind){
+    return 2*ind + 1;
+}
+int righty(int ind){
+    return 2*ind + 2;
+}
+int minim(int x, int y){
+    return ( x > y)? y : x;
+}
+
+void build(int left, int right, int ind){
+    int mid = (left + right)/2;
+    if(left == right){
+        seg[ind] = arr[left];
+        return;
+    }
+    build(left, mid, lefty(ind));
+    build(mid + 1, right, righty(ind));
+    seg[ind] = minim(seg[lefty(ind)], seg[righty(ind)]);
+    return;
+}
+
+int query(int ind, int low, int high, int l , int r){
+    if(low >= l && high <= r){
+        return seg[ind];
+    }
+    if(r < low || l > high){
+        return max;
+    }
+    int mid = (low + high)/2;
+    return minim(query(2*ind + 1, low, mid, l, r), query(2*ind + 2, mid + 1 , high, l, r));
+}
+
+void function1(){
+	Deque dq_orig, dq_ruff;
+    initDeque(&dq_orig);initDeque(&dq_ruff);
+    int q, operation; scanf("%d", &q);
+    int num; scanf("%d %d", &operation, &num);
+    enqueueFront(&dq_orig, num);enqueueFront(&dq_ruff, num);q--;
+    while (q--)
+    {
+        scanf("%d", &operation);
+        if(operation == 1){
+            scanf("%d", &num);
+            enqueueRear(&dq_orig, num);
+            if(getFront(&dq_ruff) <= num){
+                while((!isEmpty(&dq_ruff)) && (getFront(&dq_ruff) < num)){
+                    dequeueFront(&dq_ruff);
+                }
+                enqueueFront(&dq_ruff, num);
+            }
+            else{
+                while (!(isEmpty(&dq_ruff)) && (getRear(&dq_ruff) < num)){
+                    dequeueRear(&dq_ruff);
+                }
+                enqueueRear(&dq_ruff, num);
+            }
+        }
+        else if(operation == 2){
+            int dequed = getFront(&dq_orig);
+            dequeueFront(&dq_orig);
+            if(dequed == getFront(&dq_ruff)){
+                dequeueFront(&dq_ruff);
+            }
+        }
+        else{
+            printf("%d\n", getFront(&dq_ruff));
+        }
+    }    
+}
+void function2(){
+    int n, q, l , r;
+    scanf("%d %d", &n, &q);
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", arr + i);
+    }
+    build(0, n-1, 0);
+    while (q--)
+    {   
+        scanf("%d %d", &l, &r);
+        l--; r--;
+        printf("%d\n", query(0, 0, n-1, l, r));
+    }
+}
+void function3(){
+    int n; scanf("%d", &n);
+    int dp[n+1];
+    for (int i = 0; i < n+1; i++)
+    {
+        dp[i] = 0;
+    }
+    
+    dp[0] = dp[1] = 1;
+    for(int i = 2; i <= n ; i++){
+        for(int j = 1 ; j <= i; j++){
+            dp[i] += dp[j-1]*dp[i-j];
+            dp[i] %= 1000000007;
+        }
+    }
+    printf("%d", dp[n]);
+}
+void function4(){
+    //Write code for Q4
+}
