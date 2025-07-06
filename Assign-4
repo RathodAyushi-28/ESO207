@@ -1,0 +1,183 @@
+#include"assign4.h"
+#include <stdio.h>
+#include <stdlib.h>
+int timer = 0;
+int bridge_cnt = 0;
+
+
+
+int min(int x, int y){
+    return (x > y)? y : x;
+}
+
+int max(int x , int y){
+    return (x > y)? x : y;
+}
+
+typedef struct{
+    int int1; int int2;
+} Pair;
+
+typedef struct
+{
+    int* arr;
+    int curr_size;
+    int allocated_size;
+} Vector;
+
+
+void init_Vec(Vector* v){
+    v->allocated_size = 4;
+    v->curr_size = 0;
+    v->arr = (int*)malloc(4*sizeof(int));
+}
+
+void Push_back(Vector* v, int x){
+    if(v->curr_size == v->allocated_size){
+        v->allocated_size *= 2;
+        v->arr =(int*)realloc(v->arr , (v->allocated_size)*sizeof(int));
+    }
+    v->arr[v->curr_size++] = x;
+}
+
+void dfs(int node , int parent , int* vis, int* tin, int* low , Vector* v , int* bridges){
+    vis[node] = 1;
+    tin[node] = low[node] = timer++;
+    for(int i = 0 ; i < v[node].curr_size ; i++){
+        int it = v[node].arr[i];
+        if(it == parent){ continue;}
+        if(vis[it] == 0){
+            dfs(it, node, vis, tin, low, v ,bridges);
+            low[node] = min(low[it], low[node]);
+            if (low[it] > tin[node]) {
+                bridges[2*bridge_cnt] = min(it, node);
+                bridges[2*bridge_cnt + 1] = max(it, node);
+                bridge_cnt++;
+            }
+        } else {
+            low[node] = min(low[node], low[it]);
+        }
+
+    }
+}
+
+
+int comparePairs(const void *a, const void *b) {
+    Pair *p1 = (Pair *)a;
+    Pair *p2 = (Pair *)b;
+
+    if (p1->int1 != p2->int1)
+        return p1->int1 - p2->int1; 
+    else
+        return p1->int2 - p2->int2; 
+}
+
+
+void solve2(){
+    int n , m;
+    scanf("%d %d", &n , &m);
+    Vector v[n];
+    for(int i = 0 ; i < n ; i++){
+        init_Vec(v + i);
+    }
+    for (int i = 0; i < m; i++)
+    {
+        int x, y; scanf("%d %d" , &x, &y);
+        Push_back(v + x , y);
+        Push_back(v + y , x);
+    }
+    int vis[n];
+    int tin[n];
+    int low[n];
+    int bridges[2*n];
+    for(int i = 0 ; i < n ; i++){
+        tin[i] = low[i] = vis[i] = 0;
+        bridges[i*2] = bridges[2*i + 1] = -1;
+    }
+    dfs(0 , -1 , vis, tin , low, v , bridges);
+    Pair ans[bridge_cnt];
+    for (int i = 0; i < bridge_cnt; i++)
+    {
+        ans[i].int1 = bridges[i*2];
+        ans[i].int2 = bridges[2*i + 1];
+    }
+    
+    qsort(ans, bridge_cnt, sizeof(Pair), comparePairs);
+
+    for (int i = 0; i < bridge_cnt; i++)
+    {
+        printf("%d %d\n", ans[i].int1 , ans[i].int2);
+
+    }
+    
+
+    
+    
+}
+
+void solve1(){
+    int n;
+    scanf("%d", &n);
+    int arr[n];
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", arr + i);
+    }
+    int cnt1 = 0, cnt2 = 0;
+    int cand1 = 219; int cand2 = 122;
+    for (int i = 0; i < n; i++)
+    {
+        if(arr[i] == cand1){
+            cnt1++;
+        } else if(arr[i] == cand2){
+            cnt2++;
+        } else if(cnt1 == 0){
+            cnt1++;
+            cand1 = arr[i];
+        } else if(cnt2 == 0){
+            cnt2++;
+            cand2 = arr[i];
+        } else{
+            cnt1--;
+            cnt2--;
+        }
+    }
+
+    // printf("%d %d", cand1 , cand2);
+
+    int count1 = 0, count2 = 0;
+    for(int i = 0 ; i < n ; i++){
+        if(arr[i] == cand1){
+            count1++;
+        } else if(arr[i] == cand2){
+            count2++;
+        }
+    }
+
+    if(count1 > n/3 && count2 > n/3){
+        int maxim = (cand1 > cand2)? cand1 : cand2;
+        int minim = cand1 + cand2 - maxim;
+        printf("YES\n%d %d\n", minim , maxim);
+    } else {
+        printf("NO\n");
+    }
+    
+    
+}
+
+
+void function1(){
+	int t;
+    scanf("%d", &t);
+    while (t--)
+    {
+        solve1();
+    }
+    
+}
+void function2(){
+    solve2();
+}
+void function3(){
+    //Write code for Q3
+}
