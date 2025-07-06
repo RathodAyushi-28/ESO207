@@ -1,0 +1,104 @@
+#include<stdio.h>
+#define li long int
+
+int MOD = 2025;
+
+struct pair
+{
+    int bigger;
+    int smaller;
+};
+
+struct pairli
+{
+    li bigger;
+    li smaller;   
+};
+
+
+int minIm(int x, int y){
+    return (x > y)? y : x;
+}
+
+li max(li x , li y){
+    return( x> y)? x : y;
+}
+
+li min(li x , li y){
+    return (x > y)? y : x;
+}
+
+long int EuclidGCD(long int x,long int y){
+    struct pairli arr[20000];
+    li counter = 0;
+    arr[0].bigger = max(x, y);
+    arr[0].smaller = min(x,y);
+    counter++;
+    while (arr[counter - 1].smaller != 0)
+    {
+        arr[counter].bigger = arr[counter - 1].smaller;
+        arr[counter].smaller = (arr[counter - 1].bigger) % (arr[counter - 1].smaller);
+        counter++;
+    }
+    li gcd = arr[counter - 1].bigger;
+    return gcd;
+}
+
+int TrivialGCD(int a, int b){
+    int ans;
+    for(int gcd = 1 ; gcd <= min(a, b); gcd++){
+        if(a%gcd == 0 && b%gcd == 0){
+            ans = gcd;
+        }
+    }
+    return ans;
+}
+
+
+int RFib(int n){
+    if(n == 0 ){
+        return 0;
+    }
+    else if(n == 1){
+        return 1;
+    }
+    else{
+        return (RFib(n-1) + RFib(n-2))%MOD;
+    }
+    return -1;
+}
+
+
+void matrix_mult(long int a, long int b, long int c, long int d, long int a1, long int b1, long int c1, long int d1, long int* A, long int* B, long int* C, long int* D){
+    *A = (a*a1 + b*c1)%MOD;
+    *B = a*b1 + b*d1;
+    *C = c*a1+d*c1;
+    *D = c*b1+d*d1;
+    *B = (*B)%MOD;
+    *C = (*C)%MOD;
+    *D = (*D)%MOD;
+    return;
+}
+
+void power(long int a, long int b , long int c, long int d , long int n , long int* A, long int*B, long int* C, long int *D){
+    *A = 1;
+    *B = 0;
+    *C = 0;
+    *D = 1;
+    while(n > 0){
+        if(n%2 == 1){
+            matrix_mult(*A, *B, *C, *D, a, b, c, d, A, B, C, D);
+        }
+        matrix_mult(a, b, c, d, a, b, c, d, &a, &b, &c , &d);
+        n/= 2;
+    }
+    return;
+}
+
+
+int CleverFib(long int n){
+    li A, B , C, D;
+    power(1, 1, 1, 0, n , &A, &B, &C, &D);
+    return A;
+}
+
