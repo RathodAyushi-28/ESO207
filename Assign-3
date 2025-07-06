@@ -1,0 +1,78 @@
+#include"assign3.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node
+{
+    int val;
+    struct node* left;
+    struct node* right;
+};
+
+int max(int x, int y){
+    return (x > y)? x : y;
+}
+
+int height(struct node* x){
+    if(x == NULL){
+        return 0;
+    }
+    return max(height(x->left), height(x->right)) + 1;
+}
+
+
+void function1(){
+	//Write code for Q1
+    int n; scanf("%d", &n);
+    int arr[n];
+    struct node tree[n];
+    for (int i = 0; i < n; i++)
+    {
+        tree[i].left = NULL;
+        tree[i].right = NULL;
+        scanf("%d", arr + i);
+        tree[i].val = arr[i];
+        if(i == 0){
+            continue;
+        }
+        struct node* curr = tree;
+        while(1){
+            if(curr->val >= arr[i]){
+                if(curr->left == NULL){
+                    curr->left = tree + i;
+                    break;
+                }
+                else{
+                    curr = (curr->left);
+                }
+            }
+            else{
+                if(curr->right == NULL){
+                    curr->right = tree + i;
+                    break;
+                }
+                else{
+                    curr = (curr->right);
+                }
+            }
+        }
+    }
+    // for (int i = 0; i < n; i++)
+    // {
+    //     printf("curr val : %d, left = %d \n ", tree[i].val, (*(tree[i].left)).val);
+    // }
+    printf("%d", height(tree));
+}
+void function2(){
+    //Write code for Q2 
+}
+void function3(){
+    //Write code for Q3
+}
+void function4(){
+    //Write code for Q4
+}
+
+// int main(){
+//     function1();
+// }
